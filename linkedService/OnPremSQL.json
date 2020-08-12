@@ -1,0 +1,16 @@
+{
+	"name": "OnPremSQL",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=LAPTOP-7KCSLOG2;initial catalog=AdventureWorks2016CTP3;user id=sa",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI2ZDZmZWM1OC0zYzU0LTRiNzQtOGQxMS0wZjU1MjllYjIzN2YiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-mySQL",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

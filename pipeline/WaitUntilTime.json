@@ -1,0 +1,37 @@
+{
+	"name": "WaitUntilTime",
+	"properties": {
+		"activities": [
+			{
+				"name": "UntilTime",
+				"type": "Until",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(utcnow(),convertToUtc('2020-07-27T07:29:55','India Standard Time'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Wait1",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 10
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			}
+		],
+		"folder": {
+			"name": "Until Demos"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-07-27T02:05:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

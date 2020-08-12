@@ -1,0 +1,51 @@
+{
+	"name": "DerivedColumn_Branch",
+	"properties": {
+		"folder": {
+			"name": "Mapping Data Flows"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SalesDerive",
+						"type": "DatasetReference"
+					},
+					"name": "sourceSales"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_ContainerFolder",
+						"type": "DatasetReference"
+					},
+					"name": "Blob"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_Datalake",
+						"type": "DatasetReference"
+					},
+					"name": "ADL"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DerivedYear"
+				},
+				{
+					"name": "SortByYear"
+				},
+				{
+					"name": "SortByCountry"
+				},
+				{
+					"name": "RemoveColumn"
+				}
+			],
+			"script": "source(output(\n\t\tRow as string,\n\t\tCountry as string,\n\t\tSales as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('hash', 1)) ~> sourceSales\nsourceSales derive(Year = toInteger(trim(right(Country,6),'()')),\n\t\tCountry = trim(left(Country,length(Country)-6)),\n\tpartitionBy('hash', 1)) ~> DerivedYear\nDerivedYear sort(asc(Year, true),\n\tpartitionBy('hash', 1)) ~> SortByYear\nRemoveColumn sort(asc(Country, true),\n\tpartitionBy('hash', 1)) ~> SortByCountry\nDerivedYear select(mapColumn(\n\t\tYear,\n\t\tCountry,\n\t\tSalesByYear = Sales\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> RemoveColumn\nSortByYear sink(input(\n\t\tColumn_1 as string,\n\t\tColumn_2 as string,\n\t\tColumn_3 as string,\n\t\tColumn_4 as string,\n\t\tColumn_5 as string,\n\t\tColumn_6 as string,\n\t\tColumn_7 as string,\n\t\tColumn_8 as string,\n\t\tColumn_9 as string,\n\t\tColumn_10 as string,\n\t\tColumn_11 as string,\n\t\tColumn_12 as string,\n\t\tColumn_13 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['SalesYear.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Blob\nSortByCountry sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['SalesCountry.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ADL"
+		}
+	}
+}

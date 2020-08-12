@@ -1,0 +1,92 @@
+{
+	"name": "ParameterDemo",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy With Parameters",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Parameterized",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": {
+								"value": "@pipeline().parameters.PipelineFile",
+								"type": "Expression"
+							},
+							"FolderName": {
+								"value": "@pipeline().parameters.PipelineFolder",
+								"type": "Expression"
+							},
+							"ContainerName": {
+								"value": "@pipeline().parameters.PipelineContainer",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Datalake",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"parameters": {
+			"PipelineFolder": {
+				"type": "string"
+			},
+			"PipelineFile": {
+				"type": "string"
+			},
+			"PipelineContainer": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-08-05T02:26:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

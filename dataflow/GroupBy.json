@@ -1,0 +1,29 @@
+{
+	"name": "GroupBy",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "DS_Sales",
+					"script": "",
+					"dataset": {
+						"referenceName": "DS_Sales",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"sinks": [
+				{
+					"name": "Sink1",
+					"dataset": {
+						"referenceName": "DS_Datalake",
+						"type": "DatasetReference"
+					},
+					"script": "sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Sink1"
+				}
+			],
+			"script": "section Section1;\r\nshared DS_Sales = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://mydemostorage202.blob.core.windows.net/mycontainer/Sales_Details.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = DS_Sales,\r\n  #\"Changed column type 1\" = Table.TransformColumnTypes(Source, {{\"Sales\", type number}}),\r\n  #\"Changed column type\" = Table.TransformColumnTypes(#\"Changed column type 1\", {{\"Year\", Int64.Type}}),\r\n  #\"Grouped rows\" = Table.Group(#\"Changed column type\", {\"Year\", \"Product\"}, {{\"Median\", each List.Average([Sales]), type number}, {\"TotalRows\", each Table.RowCount(_), Int64.Type}})\r\nin\r\n  #\"Grouped rows\";\r\n"
+		}
+	}
+}

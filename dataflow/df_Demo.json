@@ -1,0 +1,35 @@
+{
+	"name": "df_Demo",
+	"properties": {
+		"folder": {
+			"name": "Mapping Data Flows"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Sales",
+						"type": "DatasetReference"
+					},
+					"name": "CSVFile"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_Datalake",
+						"type": "DatasetReference"
+					},
+					"name": "ADL"
+				}
+			],
+			"transformations": [
+				{
+					"name": "GroupingByYear"
+				}
+			],
+			"script": "source(output(\n\t\tInvoice_id as string,\n\t\tCust_id as string,\n\t\tYear as integer,\n\t\tProduct_id as short,\n\t\tProduct as string,\n\t\tSales as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tlimit: 1000,\n\tpartitionBy('hash', 1)) ~> CSVFile\nCSVFile aggregate(groupBy(Year),\n\tTotalSales = sum(toInteger(Sales)),\n\t\tAvgSales = round(avg(toInteger(Sales)),2),\n\tpartitionBy('hash', 1)) ~> GroupingByYear\nGroupingByYear sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['Demo123.csv'],\n\tmapColumn(\n\t\tYear,\n\t\tTotalSales,\n\t\tAvgSales\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ADL"
+		}
+	}
+}

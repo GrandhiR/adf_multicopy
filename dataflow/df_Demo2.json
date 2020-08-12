@@ -1,0 +1,35 @@
+{
+	"name": "df_Demo2",
+	"properties": {
+		"folder": {
+			"name": "Mapping Data Flows"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Sales",
+						"type": "DatasetReference"
+					},
+					"name": "SalesDetails"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_Datalake",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "ConditionalSplit1"
+				}
+			],
+			"script": "source(output(\n\t\tInvoice_id as string,\n\t\tCust_id as string,\n\t\tYear as integer,\n\t\tProduct_id as short,\n\t\tProduct as string,\n\t\tSales as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('hash', 1)) ~> SalesDetails\nSalesDetails split(Product=='digital'||Product=='sports items',\n\tProduct=='digital' || Product=='electronics',\n\tdisjoint: false) ~> ConditionalSplit1@(DigitalORSports, DigitalOrElectronics, Default)\nConditionalSplit1@DigitalORSports sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}

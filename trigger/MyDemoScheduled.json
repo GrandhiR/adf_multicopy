@@ -1,0 +1,18 @@
+{
+	"name": "MyDemoScheduled",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 2,
+				"startTime": "2020-07-14T03:52:00Z",
+				"endTime": "2020-08-14T05:52:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

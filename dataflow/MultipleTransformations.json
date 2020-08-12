@@ -1,0 +1,29 @@
+{
+	"name": "MultipleTransformations",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "DS_Sales",
+					"script": "",
+					"dataset": {
+						"referenceName": "DS_Sales",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"sinks": [
+				{
+					"name": "Sink1",
+					"dataset": {
+						"referenceName": "DS_ContainerFolder",
+						"type": "DatasetReference"
+					},
+					"script": "sink(input(\n\t\tColumn_1 as string,\n\t\tColumn_2 as string,\n\t\tColumn_3 as string,\n\t\tColumn_4 as string,\n\t\tColumn_5 as string,\n\t\tColumn_6 as string,\n\t\tColumn_7 as string,\n\t\tColumn_8 as string,\n\t\tColumn_9 as string,\n\t\tColumn_10 as string,\n\t\tColumn_11 as string,\n\t\tColumn_12 as string,\n\t\tColumn_13 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Sink1"
+				}
+			],
+			"script": "section Section1;\r\nshared DS_Sales = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://mydemostorage202.blob.core.windows.net/mycontainer/Sales_Details.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = DS_Sales,\r\n  #\"Changed column type\" = Table.TransformColumnTypes(Source, {{\"Sales\", Int64.Type}}),\r\n  #\"Replaced value\" = Table.ReplaceValue(#\"Changed column type\", \"2015\", \"2020\", Replacer.ReplaceText, {\"Year\"}),\r\n  #\"Changed column type 1\" = Table.TransformColumnTypes(#\"Replaced value\", {{\"Year\", Int64.Type}}),\r\n  #\"Marked key columns\" = Table.AddKey(#\"Changed column type 1\", {\"Invoice_id\"}, false),\r\n  #\"Inserted conditional column\" = Table.AddColumn(#\"Marked key columns\", \"CheckYear\", each if [Year] > 2016 then true else if [Year] = 2016 then \"NA\" else false),\r\n  #\"Duplicated column\" = Table.DuplicateColumn(#\"Inserted conditional column\", \"Product_id\", \"Product_id - Copy\"),\r\n  #\"Renamed columns\" = Table.RenameColumns(#\"Duplicated column\", {{\"Product_id - Copy\", \"NewPId\"}})\r\nin\r\n  #\"Renamed columns\";\r\n"
+		}
+	}
+}

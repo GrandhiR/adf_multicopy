@@ -1,0 +1,38 @@
+{
+	"name": "df_sort",
+	"properties": {
+		"folder": {
+			"name": "Mapping Data Flows"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_ContainerFolder",
+						"type": "DatasetReference"
+					},
+					"name": "SalesDetails"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_ContainerFolder",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SortByYear"
+				},
+				{
+					"name": "Filter1"
+				}
+			],
+			"script": "source(output(\n\t\tInvoice_id as short,\n\t\tCust_id as short,\n\t\tYear as integer,\n\t\tProduct_id as string,\n\t\tProduct as string,\n\t\tSales as short\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tlimit: 5000,\n\twildcardPaths:['Sales_Details.csv']) ~> SalesDetails\nFilter1 sort(asc(Year, true),\n\tasc(Product_id, true),\n\tpartitionBy('hash', 1)) ~> SortByYear\nSalesDetails filter(or(or(Year==2014,Year==2015), Product=='digital')) ~> Filter1\nSortByYear sink(input(\n\t\tColumn_1 as string,\n\t\tColumn_2 as string,\n\t\tColumn_3 as string,\n\t\tColumn_4 as string,\n\t\tColumn_5 as string,\n\t\tColumn_6 as string,\n\t\tColumn_7 as string,\n\t\tColumn_8 as string,\n\t\tColumn_9 as string,\n\t\tColumn_10 as string,\n\t\tColumn_11 as string,\n\t\tColumn_12 as string,\n\t\tColumn_13 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['SortByYear.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}

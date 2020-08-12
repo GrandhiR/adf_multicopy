@@ -1,0 +1,37 @@
+{
+	"name": "WranglingDataFlow1",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "Sales_left",
+					"script": "",
+					"dataset": {
+						"referenceName": "Sales_left",
+						"type": "DatasetReference"
+					}
+				},
+				{
+					"name": "CustomerRight",
+					"script": "",
+					"dataset": {
+						"referenceName": "CustomerRight",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"sinks": [
+				{
+					"name": "Sink1",
+					"dataset": {
+						"referenceName": "DS_ContainerFolder",
+						"type": "DatasetReference"
+					},
+					"script": "sink(input(\n\t\tColumn_1 as string,\n\t\tColumn_2 as string,\n\t\tColumn_3 as string,\n\t\tColumn_4 as string,\n\t\tColumn_5 as string,\n\t\tColumn_6 as string,\n\t\tColumn_7 as string,\n\t\tColumn_8 as string,\n\t\tColumn_9 as string,\n\t\tColumn_10 as string,\n\t\tColumn_11 as string,\n\t\tColumn_12 as string,\n\t\tColumn_13 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['result.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Sink1"
+				}
+			],
+			"script": "section Section1;\r\nshared Sales_left = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://mydemostorage202.blob.core.windows.net/mycontainer/Sales_Join_left.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared CustomerRight = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://mydemostorage202.blob.core.windows.net/mycontainer/Customer_Join_Right.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = Sales_left,\r\n  #\"Merged queries\" = Table.NestedJoin(Source, {\"CustomerId\"}, CustomerRight, {\"Customerid\"}, \"CustomerRight\", JoinKind.Inner),\r\n  #\"Expanded CustomerRight\" = Table.ExpandTableColumn(#\"Merged queries\", \"CustomerRight\", {\"Name\", \"Age\", \"Sex\"}, {\"CustomerRight.Name\", \"CustomerRight.Age\", \"CustomerRight.Sex\"})\r\nin\r\n  #\"Expanded CustomerRight\";\r\n"
+		}
+	}
+}
